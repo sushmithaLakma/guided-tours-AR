@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Clock, MapPin, Star } from "lucide-react";
+import { ArrowUpRight, Star } from "lucide-react";
 import type { Tour } from "../types/tour";
 import { formatDuration } from "../lib/format";
 
@@ -10,30 +10,30 @@ export default function TourCard({ tour }: { tour: Tour }) {
     <button
       type="button"
       onClick={() => navigate(`/tour/${tour.id}`)}
-      className="w-full text-left rounded-3xl overflow-hidden bg-white shadow-card active:scale-[0.99] transition-transform"
+      className="w-full text-left group"
     >
-      <div className={`h-32 bg-gradient-to-br ${tour.gradient} relative flex items-end p-4`}>
-        <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-ink-950/35 backdrop-blur px-2 py-1 text-white text-[11px] font-medium">
-          <Star size={11} fill="currentColor" />
-          {tour.rating}
-        </div>
+      <div className={`relative aspect-[16/10] bg-gradient-to-br ${tour.gradient} editorial-photo`}>
         {tour.stops.some((s) => s.hasAR) && (
-          <div className="absolute top-3 left-3 rounded-full bg-white/85 backdrop-blur px-2 py-1 text-[10px] font-semibold tracking-wide text-ink-800">
-            AR WAYPOINTS
-          </div>
+          <span className="absolute top-0 left-0 border border-ink-950 bg-paper px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-ink-950">
+            AR waypoints
+          </span>
         )}
-        <h3 className="font-serif text-xl text-white leading-snug drop-shadow-sm">{tour.title}</h3>
       </div>
-      <div className="p-4 pt-3">
-        <p className="text-[13px] text-ink-500 leading-snug mb-2.5">{tour.tagline}</p>
-        <div className="flex items-center gap-3 text-[12px] text-ink-500">
-          <span className="inline-flex items-center gap-1">
-            <Clock size={13} /> {formatDuration(tour.totalDuration)}
+      <div className="pt-3">
+        <h3 className="font-serif text-[19px] leading-snug text-ink-950">{tour.title}</h3>
+        <p className="text-[13px] text-ink-600 leading-snug mt-1">{tour.tagline}</p>
+        <div className="flex items-center justify-between mt-3 pb-4">
+          <span className="text-[12px] text-ink-500 flex items-center gap-1.5">
+            <Star size={11} fill="currentColor" className="text-ink-700" />
+            {tour.rating}
+            <span aria-hidden>▪</span>
+            <span className="capitalize">{tour.pace}</span>
+            <span aria-hidden>▪</span>
+            {formatDuration(tour.totalDuration)}
           </span>
-          <span className="inline-flex items-center gap-1">
-            <MapPin size={13} /> {tour.distanceKm} km
+          <span className="h-7 w-7 shrink-0 flex items-center justify-center bg-ink-100 border border-ink-950 group-active:bg-ink-950 group-active:text-paper transition-colors">
+            <ArrowUpRight size={14} />
           </span>
-          <span className="capitalize rounded-full bg-ink-100 px-2 py-0.5 text-[11px] text-ink-600">{tour.pace}</span>
         </div>
       </div>
     </button>

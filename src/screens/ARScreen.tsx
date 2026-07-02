@@ -39,11 +39,11 @@ export default function ARScreen() {
   if (!tour || !stop) return null;
 
   return (
-    <div className="relative h-dvh bg-ink-950 text-white overflow-hidden">
+    <div className="relative h-dvh bg-ink-950 text-paper overflow-hidden">
       <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 h-full w-full object-cover" />
       {!cameraReady && (
-        <div className={`absolute inset-0 bg-gradient-to-br ${stop.photo}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent,rgba(0,0,0,0.55))]" />
+        <div className={`absolute inset-0 bg-gradient-to-br ${stop.photo} editorial-photo`}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent,rgba(0,0,0,0.6))]" />
         </div>
       )}
 
@@ -53,22 +53,24 @@ export default function ARScreen() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="h-9 w-9 rounded-full bg-black/40 backdrop-blur flex items-center justify-center"
+          className="h-9 w-9 flex items-center justify-center border border-paper/50 bg-ink-950/40 backdrop-blur-sm"
           aria-label="Close AR view"
         >
-          <X size={18} />
+          <X size={17} />
         </button>
-        <span className="rounded-full bg-black/40 backdrop-blur px-3 py-1.5 text-[12px] font-medium">{stop.title}</span>
+        <span className="border border-paper/50 bg-ink-950/40 backdrop-blur-sm px-3 py-1.5 text-[11px] font-medium uppercase tracking-wide">
+          {stop.title}
+        </span>
         <span className="w-9" />
       </div>
 
       {scanning ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-10 text-center">
           <div className="relative h-40 w-40">
-            <div className="absolute inset-0 rounded-3xl border-2 border-white/40" />
-            <ScanLine className="absolute inset-0 m-auto text-terracotta-300 animate-pulse" size={40} />
+            <div className="absolute inset-0 border border-paper/40" />
+            <ScanLine className="absolute inset-0 m-auto text-paper animate-pulse" size={36} />
           </div>
-          <p className="text-[13px] text-white/85">{stop.arHint ?? "Point your camera at the landmark to reveal AR details."}</p>
+          <p className="text-[13px] text-paper/85">{stop.arHint ?? "Point your camera at the landmark to reveal AR details."}</p>
         </div>
       ) : (
         <>
@@ -81,35 +83,35 @@ export default function ARScreen() {
               style={{ left: `${label.x}%`, top: `${label.y}%`, animationDelay: `${i * 150}ms` }}
             >
               <span className="flex flex-col items-center">
-                <span className="rounded-full bg-white/95 text-ink-900 px-3 py-1.5 text-[12px] font-medium shadow-float whitespace-nowrap">
+                <span className="bg-paper text-ink-950 border border-ink-950 px-3 py-1.5 text-[11px] font-medium uppercase tracking-wide whitespace-nowrap">
                   {label.label}
                 </span>
-                <span className="h-3 w-px bg-white/80" />
-                <span className="h-2 w-2 rounded-full bg-terracotta-400 ring-2 ring-white/70" />
+                <span className="h-3 w-px bg-paper/80" />
+                <span className="h-2 w-2 bg-paper ring-2 ring-ink-950/40" />
               </span>
             </button>
           ))}
 
           {activeLabel !== null && stop.arLabels?.[activeLabel] && (
-            <div className="absolute inset-x-4 bottom-28 rounded-2xl bg-white text-ink-900 p-4 shadow-float float-in">
-              <p className="text-[14px] font-semibold">{stop.arLabels[activeLabel].label}</p>
-              <p className="text-[12.5px] text-ink-500 mt-1">{stop.arLabels[activeLabel].detail}</p>
+            <div className="absolute inset-x-4 bottom-28 bg-paper text-ink-950 border border-ink-950 p-4 float-in">
+              <p className="text-[15px] font-serif">{stop.arLabels[activeLabel].label}</p>
+              <p className="text-[12.5px] text-ink-600 mt-1">{stop.arLabels[activeLabel].detail}</p>
             </div>
           )}
         </>
       )}
 
       <div className="absolute bottom-0 inset-x-0 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] bg-gradient-to-t from-black/70 to-transparent">
-        <div className="flex items-center gap-3 rounded-2xl bg-black/45 backdrop-blur px-3 py-2.5">
+        <div className="flex items-center gap-3 border border-paper/40 bg-ink-950/50 backdrop-blur-sm px-3 py-2.5">
           <button
             type="button"
             onClick={player.toggle}
-            className="h-9 w-9 shrink-0 rounded-full bg-terracotta-500 text-ink-950 flex items-center justify-center"
+            className="h-9 w-9 shrink-0 flex items-center justify-center bg-paper text-ink-950"
             aria-label={player.isPlaying ? "Pause narration" : "Resume narration"}
           >
             {player.isPlaying ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" className="ml-0.5" />}
           </button>
-          <p className="text-[12.5px] text-white/90 flex-1 truncate">Narration continues while you look around</p>
+          <p className="text-[12.5px] text-paper/90 flex-1 truncate">Narration continues while you look around</p>
         </div>
       </div>
     </div>

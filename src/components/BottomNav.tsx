@@ -17,7 +17,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="absolute bottom-0 inset-x-0 z-30 flex items-stretch bg-ink-950/95 backdrop-blur border-t border-ink-800 pb-[env(safe-area-inset-bottom,0px)]"
+      className="absolute bottom-0 inset-x-0 z-30 flex items-stretch bg-paper border-t border-ink-950 pb-[env(safe-area-inset-bottom,0px)]"
       aria-label="Tour navigation"
     >
       {tabs.map(({ key, label, icon: Icon, path }) => {
@@ -27,14 +27,14 @@ export default function BottomNav() {
             key={key}
             type="button"
             onClick={() => navigate(path)}
-            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="flex-1 flex flex-col items-center gap-1.5 py-2.5"
           >
-            <Icon
-              size={20}
-              strokeWidth={active ? 2.4 : 1.8}
-              className={active ? "text-terracotta-400" : "text-ink-400"}
-            />
-            <span className={`text-[11px] font-medium ${active ? "text-terracotta-300" : "text-ink-400"}`}>
+            <Icon size={18} strokeWidth={active ? 2 : 1.5} className={active ? "text-ink-950" : "text-ink-400"} />
+            <span
+              className={`text-[10px] font-medium uppercase tracking-wide pb-0.5 ${
+                active ? "text-ink-950 border-b border-ink-950" : "text-ink-400"
+              }`}
+            >
               {label}
             </span>
           </button>

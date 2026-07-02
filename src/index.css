@@ -4,26 +4,28 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "Fraunces", Georgia, serif;
 
-  /* Warm, calm "travel journal" palette — designed to feel unhurried, not app-chrome-y */
-  --color-ink-950: #171310;
-  --color-ink-900: #211b16;
-  --color-ink-800: #2c241d;
-  --color-ink-700: #3d332a;
-  --color-ink-600: #574a3c;
-  --color-ink-500: #786757;
-  --color-ink-400: #a2907c;
-  --color-ink-300: #cabda9;
-  --color-ink-200: #e4dac8;
-  --color-ink-100: #f0e9db;
-  --color-ink-50: #f8f4ea;
+  /* Editorial gallery palette — cream, charcoal, hairline borders, no color noise */
+  --color-ink-950: #17140f;
+  --color-ink-900: #221e18;
+  --color-ink-800: #332c24;
+  --color-ink-700: #4a4136;
+  --color-ink-600: #635749;
+  --color-ink-500: #7d7266;
+  --color-ink-400: #9a9083;
+  --color-ink-300: #bcb3a4;
+  --color-ink-200: #d8d2c6;
+  --color-ink-100: #e8e3d8;
+  --color-ink-50: #f2eee6;
 
-  --color-paper: #fbf7ee;
+  --color-paper: #ece7dd;
+  --color-frame: #a39c92;
 
-  --color-terracotta-600: #b5502e;
-  --color-terracotta-500: #c96a3f;
-  --color-terracotta-400: #d98957;
-  --color-terracotta-300: #e6ab7f;
-  --color-terracotta-100: #f7e2cf;
+  /* used only as sparing "live/active" signal, never for large fills */
+  --color-terracotta-600: #a8492a;
+  --color-terracotta-500: #b5502e;
+  --color-terracotta-400: #c17048;
+  --color-terracotta-300: #d09170;
+  --color-terracotta-100: #ecdccf;
 
   --color-sage-600: #566b52;
   --color-sage-500: #71876a;
@@ -34,8 +36,8 @@
   --color-sky-500: #4a7f9c;
   --color-sky-100: #dbe9f0;
 
-  --shadow-card: 0 1px 2px rgba(23, 19, 16, 0.06), 0 8px 24px -12px rgba(23, 19, 16, 0.25);
-  --shadow-float: 0 12px 32px -8px rgba(23, 19, 16, 0.35);
+  --shadow-sheet: 0 -2px 0 rgba(23, 20, 15, 0.06);
+  --shadow-float: 0 10px 28px -10px rgba(23, 20, 15, 0.28);
 }
 
 * {
@@ -82,17 +84,15 @@ button {
     min-height: 100dvh;
     max-height: 932px;
     margin-block: env(safe-area-inset-top, 0);
-    border-radius: 40px;
-    box-shadow: var(--shadow-float), 0 0 0 10px var(--color-ink-950);
+    border: 1px solid var(--color-ink-950);
   }
   .device-shell {
     min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-ink-950);
-    background-image: radial-gradient(circle at 50% 0%, #2c241d, #171310 70%);
-    padding: 24px 0;
+    background: var(--color-frame);
+    padding: 40px 0;
   }
 }
 
@@ -102,6 +102,11 @@ button {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Mutes tour gradients into a moody duotone so placeholder art reads as editorial photography */
+.editorial-photo {
+  filter: grayscale(0.5) sepia(0.12) contrast(1.08) brightness(0.94);
 }
 
 @keyframes pulse-ring {
