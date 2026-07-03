@@ -12,6 +12,7 @@ import FavoriteButton from "../components/FavoriteButton";
 import MapListToggle from "../components/MapListToggle";
 import FilterChipRow from "../components/FilterChipRow";
 import MapZoomControls from "../components/MapZoomControls";
+import StreetGrid from "../components/StreetGrid";
 import type { Stop } from "../types/tour";
 
 const FILTERS = [
@@ -109,6 +110,7 @@ export default function MapScreen() {
             className="relative origin-top-left transition-transform duration-200"
             style={{ width: "100%", height: "100%", transform: `scale(${zoom})` }}
           >
+            <StreetGrid />
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               <polyline
                 points={routePath}
@@ -133,10 +135,10 @@ export default function MapScreen() {
               className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
               style={{ left: `${exitPoint.x}%`, top: `${exitPoint.y}%` }}
             >
-              <div className="h-7 w-7 rounded-full bg-paper border border-ink-950 text-ink-950 flex items-center justify-center shadow-float">
+              <div className="h-7 w-7 bg-paper border border-ink-950 text-ink-950 flex items-center justify-center shadow-float">
                 <DoorOpen size={13} />
               </div>
-              <span className="mt-1 rounded-full border border-ink-950 bg-paper px-2 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
+              <span className="mt-1 border border-ink-950 bg-paper px-2 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
                 Quick exit
               </span>
             </div>
@@ -156,7 +158,7 @@ export default function MapScreen() {
                 >
                   <span className="relative">
                     <span
-                      className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold border shadow-float ${
+                      className={`h-8 w-8 flex items-center justify-center text-[11px] font-semibold border shadow-float ${
                         current
                           ? "bg-ink-950 text-paper border-ink-950"
                           : visited || done
@@ -172,7 +174,7 @@ export default function MapScreen() {
                       </span>
                     )}
                   </span>
-                  <span className="mt-1 max-w-[72px] truncate rounded-full text-[9px] font-medium text-ink-800 bg-paper/90 px-2 py-0.5 shadow-sm">
+                  <span className="mt-1 max-w-[72px] truncate border border-ink-950 text-[9px] font-medium text-ink-800 bg-paper/90 px-2 py-0.5 shadow-sm">
                     {stop.title}
                   </span>
                 </button>
@@ -196,7 +198,7 @@ export default function MapScreen() {
       )}
 
       {selected && (
-        <div className="absolute inset-x-3 bottom-[130px] rounded-3xl bg-paper border border-ink-950 p-4 shadow-float float-in">
+        <div className="absolute inset-x-3 bottom-[130px] bg-paper border border-ink-950 p-4 shadow-float float-in">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] text-ink-500 font-mono">{formatTime(selected.timestamp)}</p>
@@ -216,7 +218,7 @@ export default function MapScreen() {
             <button
               type="button"
               onClick={() => jumpToStop(selected)}
-              className="flex-1 rounded-full bg-ink-950 text-paper text-[13px] font-medium py-2.5"
+              className="flex-1 bg-ink-950 text-paper text-[13px] font-medium py-2.5"
             >
               Jump audio here
             </button>
@@ -228,7 +230,7 @@ export default function MapScreen() {
               <button
                 type="button"
                 onClick={() => navigate(`/tour/${tour.id}/ar/${selected.id}`)}
-                className="flex-1 rounded-full border border-ink-950 text-ink-950 text-[13px] font-medium py-2.5 flex items-center justify-center gap-1"
+                className="flex-1 border border-ink-950 text-ink-950 text-[13px] font-medium py-2.5 flex items-center justify-center gap-1"
               >
                 <Sparkles size={13} /> View AR
               </button>

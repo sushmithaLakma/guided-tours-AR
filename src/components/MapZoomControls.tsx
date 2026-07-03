@@ -18,7 +18,7 @@ export default function MapZoomControls({
       <button
         type="button"
         disabled={zoom >= maxZoom}
-        className="h-10 w-10 flex items-center justify-center rounded-full bg-paper border border-ink-950 shadow-float disabled:opacity-40"
+        className="h-10 w-10 flex items-center justify-center bg-paper border border-ink-950 shadow-float disabled:opacity-40"
         onClick={() => setZoom((z) => Math.min(z + step, maxZoom))}
         aria-label="Zoom in"
       >
@@ -27,7 +27,7 @@ export default function MapZoomControls({
       <button
         type="button"
         disabled={zoom <= minZoom}
-        className="h-10 w-10 flex items-center justify-center rounded-full bg-paper border border-ink-950 shadow-float disabled:opacity-40"
+        className="h-10 w-10 flex items-center justify-center bg-paper border border-ink-950 shadow-float disabled:opacity-40"
         onClick={() => setZoom((z) => Math.max(z - step, minZoom))}
         aria-label="Zoom out"
       >
@@ -35,7 +35,7 @@ export default function MapZoomControls({
       </button>
       <button
         type="button"
-        className="h-10 w-10 flex items-center justify-center rounded-full bg-paper border border-ink-950 shadow-float"
+        className="h-10 w-10 flex items-center justify-center bg-paper border border-ink-950 shadow-float"
         onClick={() => setZoom(() => minZoom)}
         aria-label="Recenter"
       >

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { LocateFixed } from "lucide-react";
 import { cities } from "../data/cities";
 import { getToursByCity } from "../data/tours";
 import TourCard from "../components/TourCard";
@@ -7,7 +8,7 @@ import BottomNav from "../components/BottomNav";
 import { useCity } from "../context/CityContext";
 
 export default function HomeScreen() {
-  const { cityId, setCityId } = useCity();
+  const { cityId, setCityId, userLocation, locating, locationError, locateMe } = useCity();
   const activeCity = cities.find((c) => c.id === cityId)!;
   const tourList = useMemo(() => getToursByCity(cityId), [cityId]);
 
@@ -15,8 +16,20 @@ export default function HomeScreen() {
     <div className="relative h-dvh flex flex-col bg-paper">
       <div className="flex items-center justify-between px-5 py-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] border-b border-ink-950">
         <span className="font-serif text-[20px] text-ink-950">Wayfare</span>
-        <span className="text-[11px] uppercase tracking-wide text-ink-500">Solo travel</span>
+        <button
+          type="button"
+          onClick={locateMe}
+          disabled={locating}
+          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-ink-500 disabled:opacity-60"
+        >
+          <LocateFixed size={13} className={locating ? "animate-pulse" : ""} />
+          {locating ? "Locating…" : userLocation ? `Near ${activeCity.name}` : "Use my location"}
+        </button>
       </div>
+
+      {locationError && (
+        <p className="px-5 pt-2 text-[11px] text-terracotta-600">{locationError}</p>
+      )}
 
       <header className="px-5 pt-8 pb-6">
         <h1 className="font-serif text-[38px] leading-[1.05] text-ink-950 tracking-tight">

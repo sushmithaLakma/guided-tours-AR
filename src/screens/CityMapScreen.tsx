@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Heart, Sparkles, Store, UtensilsCrossed } from "lucide-react";
+import { Heart, Sparkles, Star, Store, UtensilsCrossed } from "lucide-react";
 import { cities } from "../data/cities";
 import { getToursByCity } from "../data/tours";
 import { getPlacesByCity } from "../data/places";
 import { usePlayer } from "../context/PlayerContext";
 import { useUserData } from "../context/UserDataContext";
+import { useCity } from "../context/CityContext";
 import { formatTime } from "../lib/format";
+import { haversineKm, kmToMiles } from "../lib/geo";
 import ScreenHeader from "../components/ScreenHeader";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
 import MapListToggle from "../components/MapListToggle";
 import FilterChipRow from "../components/FilterChipRow";
 import MapZoomControls from "../components/MapZoomControls";
+import StreetGrid from "../components/StreetGrid";
 import type { Stop, Tour } from "../types/tour";
 import type { Place } from "../types/place";
 
@@ -30,6 +33,7 @@ export default function CityMapScreen() {
   const navigate = useNavigate();
   const player = usePlayer();
   const userData = useUserData();
+  const { userLocation } = useCity();
   const [zoom, setZoom] = useState(1);
   const [mode, setMode] = useState<"map" | "list">("map");
   const [filter, setFilter] = useState("all");
@@ -87,7 +91,7 @@ export default function CityMapScreen() {
                           </span>
                         </span>
                         {visited && (
-                          <span className="rounded-full text-[9px] uppercase tracking-wide border border-ink-950 bg-ink-950 text-paper px-2 py-0.5 shrink-0">
+                          <span className="text-[9px] uppercase tracking-wide border border-ink-950 bg-ink-950 text-paper px-2 py-0.5 shrink-0">
                             Visited
                           </span>
                         )}
@@ -126,6 +130,7 @@ export default function CityMapScreen() {
             className="relative origin-top-left transition-transform duration-200"
             style={{ width: "100%", height: "100%", transform: `scale(${zoom})` }}
           >
+            <StreetGrid />
             {tours.flatMap((tour) =>
               tour.stops.map((stop) => {
                 const visited = userData.isVisited(stop.id);
@@ -140,7 +145,7 @@ export default function CityMapScreen() {
                   >
                     <span className="relative">
                       <span
-                        className={`h-6 w-6 rounded-full flex items-center justify-center border border-ink-950 shadow-float ${
+                        className={`h-6 w-6 flex items-center justify-center border border-ink-950 shadow-float ${
                           visited ? "bg-ink-950" : "bg-paper"
                         }`}
                       />
@@ -148,7 +153,7 @@ export default function CityMapScreen() {
                         <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-terracotta-500 border border-paper" />
                       )}
                     </span>
-                    <span className="mt-1 max-w-[64px] truncate rounded-full text-[8.5px] font-medium text-ink-800 bg-paper/90 px-1.5 py-0.5 shadow-sm">
+                    <span className="mt-1 max-w-[64px] truncate border border-ink-950 text-[8.5px] font-medium text-ink-800 bg-paper/90 px-1.5 py-0.5 shadow-sm">
                       {stop.title}
                     </span>
                   </button>
@@ -167,10 +172,10 @@ export default function CityMapScreen() {
                   className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-opacity ${dimmed ? "opacity-30" : ""}`}
                   style={{ left: `${place.x}%`, top: `${place.y}%` }}
                 >
-                  <span className="flex items-center justify-center h-7 w-7 rounded-full bg-paper border border-ink-950 shadow-float">
+                  <span className="flex items-center justify-center h-7 w-7 bg-paper border border-ink-950 shadow-float">
                     <Icon size={12} className="text-ink-950" />
                   </span>
-                  <span className="mt-1 max-w-[64px] truncate rounded-full text-[8.5px] font-medium text-ink-800 bg-paper/90 px-1.5 py-0.5 shadow-sm">
+                  <span className="mt-1 max-w-[64px] truncate border border-ink-950 text-[8.5px] font-medium text-ink-800 bg-paper/90 px-1.5 py-0.5 shadow-sm">
                     {place.name}
                   </span>
                 </button>
@@ -180,9 +185,9 @@ export default function CityMapScreen() {
 
           <MapZoomControls zoom={zoom} setZoom={setZoom} />
 
-          <div className="absolute left-3 bottom-3 rounded-2xl bg-paper border border-ink-950 px-3 py-2.5 text-[10px] text-ink-600 flex flex-col gap-1 shadow-float">
+          <div className="absolute left-3 bottom-3 bg-paper border border-ink-950 px-3 py-2.5 text-[10px] text-ink-600 flex flex-col gap-1 shadow-float">
             <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded-full bg-ink-950 border border-ink-950 inline-block" /> Visited stop
+              <span className="h-3 w-3 bg-ink-950 border border-ink-950 inline-block" /> Visited stop
             </span>
             <span className="flex items-center gap-1.5">
               <UtensilsCrossed size={10} /> Eat &amp; shop
@@ -192,7 +197,7 @@ export default function CityMapScreen() {
       )}
 
       {selected && selected.kind === "stop" && (
-        <div className="absolute inset-x-3 bottom-[130px] rounded-3xl bg-paper border border-ink-950 p-4 shadow-float float-in">
+        <div className="absolute inset-x-3 bottom-[130px] bg-paper border border-ink-950 p-4 shadow-float float-in">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] text-ink-400 uppercase tracking-wide">{selected.tour.title}</p>
@@ -200,7 +205,7 @@ export default function CityMapScreen() {
               <p className="text-[15px] font-serif text-ink-950 mt-0.5">{selected.stop.title}</p>
               <p className="text-[12.5px] text-ink-600 mt-0.5">{selected.stop.teaser}</p>
               {userData.isVisited(selected.stop.id) && (
-                <span className="inline-flex items-center gap-1 mt-2 rounded-full border border-ink-950 bg-ink-950 text-paper px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide">
+                <span className="inline-flex items-center gap-1 mt-2 border border-ink-950 bg-ink-950 text-paper px-2 py-0.5 text-[9px] font-medium uppercase tracking-wide">
                   Visited
                 </span>
               )}
@@ -219,14 +224,14 @@ export default function CityMapScreen() {
                 else player.loadTour(tour, { startAt: stop.timestamp, autoplay: false });
                 navigate(`/tour/${tour.id}/listen`);
               }}
-              className="flex-1 rounded-full bg-ink-950 text-paper text-[13px] font-medium py-2.5"
+              className="flex-1 bg-ink-950 text-paper text-[13px] font-medium py-2.5"
             >
               Jump audio here
             </button>
             <button
               type="button"
               onClick={() => userData.toggleFavoriteTour(selected.tour.id)}
-              className="h-11 w-11 shrink-0 rounded-full border border-ink-950 flex items-center justify-center"
+              className="h-11 w-11 shrink-0 border border-ink-950 flex items-center justify-center"
               aria-label={userData.isFavoriteTour(selected.tour.id) ? "Remove tour from favorites" : "Add tour to favorites"}
             >
               <Heart size={16} fill={userData.isFavoriteTour(selected.tour.id) ? "currentColor" : "none"} />
@@ -235,7 +240,7 @@ export default function CityMapScreen() {
               <button
                 type="button"
                 onClick={() => navigate(`/tour/${selected.tour.id}/ar/${selected.stop.id}`)}
-                className="h-11 w-11 shrink-0 rounded-full border border-ink-950 flex items-center justify-center"
+                className="h-11 w-11 shrink-0 border border-ink-950 flex items-center justify-center"
                 aria-label="View in AR"
               >
                 <Sparkles size={16} />
@@ -246,13 +251,28 @@ export default function CityMapScreen() {
       )}
 
       {selected && selected.kind === "place" && (
-        <div className="absolute inset-x-3 bottom-[130px] rounded-3xl bg-paper border border-ink-950 p-4 shadow-float float-in">
+        <div className="absolute inset-x-3 bottom-[130px] bg-paper border border-ink-950 p-4 shadow-float float-in">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] text-ink-400 uppercase tracking-wide">{selected.place.category}</p>
               <p className="text-[15px] font-serif text-ink-950 mt-0.5">{selected.place.name}</p>
               <p className="text-[12.5px] text-ink-600 mt-0.5">{selected.place.blurb}</p>
-              <p className="text-[11px] text-ink-500 mt-1.5">{selected.place.tag}</p>
+              <div className="flex items-center gap-2.5 mt-1.5">
+                <p className="text-[11px] text-ink-500">{selected.place.tag}</p>
+                <span className="flex items-center gap-1 text-[11px] text-ink-800 font-medium">
+                  <Star size={11} className="text-terracotta-500" fill="currentColor" />
+                  {selected.place.rating.toFixed(1)}
+                  <span className="text-ink-400 font-normal">({selected.place.ratingCount.toLocaleString()})</span>
+                </span>
+                {userLocation && (
+                  <span className="text-[11px] text-ink-500">
+                    {kmToMiles(
+                      haversineKm(userLocation.lat, userLocation.lng, selected.place.lat, selected.place.lng)
+                    ).toFixed(1)}{" "}
+                    mi away
+                  </span>
+                )}
+              </div>
             </div>
             <button type="button" onClick={() => setSelected(null)} className="text-ink-500 text-lg leading-none px-1" aria-label="Close">
               ×

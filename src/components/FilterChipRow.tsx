@@ -21,7 +21,7 @@ export default function FilterChipRow({
             key={opt.key}
             type="button"
             onClick={() => onChange(opt.key)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-[12px] font-medium whitespace-nowrap ${
+            className={`shrink-0 border px-3.5 py-1.5 text-[12px] font-medium whitespace-nowrap ${
               isActive ? "bg-ink-950 text-paper border-ink-950" : "border-ink-950 text-ink-700"
             }`}
           >

@@ -4,6 +4,9 @@ export interface City {
   country: string;
   blurb: string;
   gradient: string;
+  /** real-world coordinates, used to find the nearest city from device geolocation */
+  lat: number;
+  lng: number;
 }
 
 export type TourPace = "leisurely" | "moderate" | "brisk";

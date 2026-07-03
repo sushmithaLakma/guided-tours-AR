@@ -51,7 +51,7 @@ src/
   context/
     PlayerContext.tsx         Global playback state (position, speed, chapter, AR)
     UserDataContext.tsx       localStorage: favorite tours, visited stops, per-tour feedback
-    CityContext.tsx           Shared "currently browsing" city, used by Home/Map/Eateries
+    CityContext.tsx           Shared "currently browsing" city + live geolocation, used by Home/Map/Eateries
   screens/
     HomeScreen.tsx            City picker + tour list
     FavoritesScreen.tsx        Favorited tours across every city
@@ -62,12 +62,16 @@ src/
     CityMapScreen.tsx           Zoomed-out overview of every tour + eatery in a city
     ARScreen.tsx                 Mock AR waypoint overlay
   components/                  MiniPlayer, BottomNav, TourCard, PlaceCard, PhotoBlock,
-                                FavoriteButton, CoveredBadge, TourFeedbackDrawer, ScreenHeader
+                                FavoriteButton, CoveredBadge, TourFeedbackDrawer, ScreenHeader,
+                                StreetGrid (map background)
+  lib/geo.ts                   Haversine distance + nearest-city matching for geolocation
 ```
 
 ## Notes on the prototype
 
 - Audio playback is simulated (an internal clock advances "elapsed time" at the selected speed) rather than streaming real audio files, since no narration recordings exist yet — the entire transport/seek/speed/chapter UX is real and wired end-to-end, ready to swap in an `<audio>`/HLS backend.
-- Map and AR are stylized mockups (SVG route + CSS gradients) rather than a live maps SDK or WebXR session. The interaction model (pins, live position, tap-to-jump, camera-with-fallback) is what would carry over to a production maps/AR integration.
+- Map and AR are stylized mockups (SVG street-block backdrop + route pins) rather than a live maps SDK or WebXR session. The interaction model (pins, live position, tap-to-jump, camera-with-fallback) is what would carry over to a production maps/AR integration.
 - Card and hero photography loads from Lorem Picsum (`src/lib/photo.ts`), seeded deterministically per tour/stop/place id — real photographs rather than illustrative placeholders, at the cost of one external dependency (no API key needed). `PhotoBlock` falls back to the tour's gradient if an image ever fails to load, so a network hiccup degrades gracefully instead of showing a broken image. A production version would swap this for licensed or on-location photography per destination.
 - Favorite tours, visited stops, and per-tour feedback persist to the browser's `localStorage` (see `src/context/UserDataContext.tsx`) — single device, no account or backend sync. A production version would move this to a per-user account so history follows a traveller across devices.
+- "Use my location" (Home screen) calls the real `navigator.geolocation` API and matches the traveller to the nearest of the app's three cities via a haversine great-circle calculation (`src/lib/geo.ts`) against each city's real-world lat/lng — no mock coordinates. If location access is denied or unavailable, the app falls back to the last manually-selected city and shows an inline message rather than blocking navigation.
+- Eatery map callouts show a star rating and a live distance in miles, computed the same way (haversine from the user's current coordinates to the place's real-world lat/lng). Distance only appears once location has been granted; otherwise the callout just omits it rather than showing a placeholder.

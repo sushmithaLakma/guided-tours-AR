@@ -1,4 +1,4 @@
-import { Store, UtensilsCrossed } from "lucide-react";
+import { Star, Store, UtensilsCrossed } from "lucide-react";
 import type { Place } from "../types/place";
 import PhotoBlock from "./PhotoBlock";
 
@@ -13,7 +13,13 @@ export default function PlaceCard({ place }: { place: Place }) {
       </PhotoBlock>
       <div className="pt-2">
         <h4 className="text-[13px] font-serif text-ink-950 leading-snug truncate">{place.name}</h4>
-        <p className="text-[11px] text-ink-500 mt-0.5">{place.tag}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <p className="text-[11px] text-ink-500">{place.tag}</p>
+          <span className="flex items-center gap-0.5 text-[11px] text-ink-800 font-medium">
+            <Star size={10} className="text-terracotta-500" fill="currentColor" />
+            {place.rating.toFixed(1)}
+          </span>
+        </div>
       </div>
     </div>
   );
