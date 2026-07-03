@@ -49,11 +49,13 @@ src/
   types/tour.ts, place.ts     Tour/Stop and Place data models
   data/                       Mock content: 3 cities, 7 tours, ~30 stops, restaurants/markets
   context/
+    AuthContext.tsx           localStorage: signed-up traveller profile (name + mobile), gates app entry
     PlayerContext.tsx         Global playback state (position, speed, chapter, AR)
     UserDataContext.tsx       localStorage: favorite tours, visited stops, per-tour feedback
     CityContext.tsx           Shared "currently browsing" city + live geolocation, used by Home/Map/Eateries
   screens/
-    HomeScreen.tsx            City picker + tour list
+    SignUpScreen.tsx          Name + mobile number sign-up, shown once before the rest of the app
+    HomeScreen.tsx            City picker + tour list, greets the signed-up traveller by name
     FavoritesScreen.tsx        Favorited tours across every city
     EateriesScreen.tsx         Restaurants/markets for the selected city
     TourDetailScreen.tsx        Tour overview + stop list (doubles as the "Stops" tab)
@@ -75,3 +77,4 @@ src/
 - Favorite tours, visited stops, and per-tour feedback persist to the browser's `localStorage` (see `src/context/UserDataContext.tsx`) — single device, no account or backend sync. A production version would move this to a per-user account so history follows a traveller across devices.
 - "Use my location" (Home screen) calls the real `navigator.geolocation` API and matches the traveller to the nearest of the app's three cities via a haversine great-circle calculation (`src/lib/geo.ts`) against each city's real-world lat/lng — no mock coordinates. If location access is denied or unavailable, the app falls back to the last manually-selected city and shows an inline message rather than blocking navigation.
 - Eatery map callouts show a star rating and a live distance in miles, computed the same way (haversine from the user's current coordinates to the place's real-world lat/lng). Distance only appears once location has been granted; otherwise the callout just omits it rather than showing a placeholder.
+- Sign-up asks for a name and mobile number and persists the profile to `localStorage` (see `src/context/AuthContext.tsx`) — there's no OTP/verification step or backend, so any name and a plausible-looking number are accepted. The bottom nav is intentionally identical everywhere (Home, Map, Favourites, Eateries) rather than swapping to tour-specific tabs while a tour is active; per-tour navigation (Listen, Stops, route Map) is reached via the tour detail screen and the map icon in the player header instead.

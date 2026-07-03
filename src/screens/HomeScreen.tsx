@@ -6,15 +6,25 @@ import TourCard from "../components/TourCard";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
 import { useCity } from "../context/CityContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomeScreen() {
   const { cityId, setCityId, userLocation, locating, locationError, locateMe } = useCity();
+  const { profile } = useAuth();
   const activeCity = cities.find((c) => c.id === cityId)!;
   const tourList = useMemo(() => getToursByCity(cityId), [cityId]);
+  const firstName = profile?.name.trim().split(/\s+/)[0] ?? "";
 
   return (
     <div className="relative h-dvh flex flex-col bg-paper">
-      <div className="flex items-center justify-between px-5 py-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] border-b border-ink-950">
+      <div className="flex items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] pb-2">
+        <span className="h-6 w-6 flex items-center justify-center border border-ink-950 bg-ink-950 text-paper text-[11px] font-medium uppercase shrink-0">
+          {firstName.charAt(0) || "?"}
+        </span>
+        <span className="text-[12px] text-ink-600 truncate">Hi, {firstName}</span>
+      </div>
+
+      <div className="flex items-center justify-between px-5 pb-4 border-b border-ink-950">
         <span className="font-serif text-[20px] text-ink-950">Wayfare</span>
         <button
           type="button"
