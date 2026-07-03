@@ -110,23 +110,13 @@ export default function MapScreen() {
             style={{ width: "100%", height: "100%", transform: `scale(${zoom})` }}
           >
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-              <defs>
-                <pattern id="streets" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
-                  <path d="M0 4.5 H9" stroke="#d8d2c6" strokeWidth="0.35" />
-                  <path d="M4.5 0 V9" stroke="#d8d2c6" strokeWidth="0.35" />
-                </pattern>
-              </defs>
-              <rect width="100" height="100" fill="url(#streets)" opacity="0.6" />
-              <ellipse cx="14" cy="78" rx="16" ry="12" fill="#dedad0" opacity="0.9" />
-              <ellipse cx="90" cy="20" rx="14" ry="16" fill="#d8d2c6" opacity="0.7" />
-
               <polyline
                 points={routePath}
                 fill="none"
                 stroke="#17140f"
                 strokeWidth="0.6"
                 strokeDasharray="2.4 1.6"
-                strokeLinecap="square"
+                strokeLinecap="round"
               />
               <polyline
                 points={`${exitPoint.x},${exitPoint.y} ${tour.stops[0].x},${tour.stops[0].y}`}
@@ -134,7 +124,7 @@ export default function MapScreen() {
                 stroke="#7d7266"
                 strokeWidth="0.5"
                 strokeDasharray="1.2 1.4"
-                strokeLinecap="square"
+                strokeLinecap="round"
               />
             </svg>
 
@@ -143,10 +133,10 @@ export default function MapScreen() {
               className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
               style={{ left: `${exitPoint.x}%`, top: `${exitPoint.y}%` }}
             >
-              <div className="h-6 w-6 bg-paper border border-ink-950 text-ink-950 flex items-center justify-center">
+              <div className="h-7 w-7 rounded-full bg-paper border border-ink-950 text-ink-950 flex items-center justify-center shadow-float">
                 <DoorOpen size={13} />
               </div>
-              <span className="mt-1 border border-ink-950 bg-paper px-1.5 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
+              <span className="mt-1 rounded-full border border-ink-950 bg-paper px-2 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
                 Quick exit
               </span>
             </div>
@@ -166,7 +156,7 @@ export default function MapScreen() {
                 >
                   <span className="relative">
                     <span
-                      className={`h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold border shadow-float ${
                         current
                           ? "bg-ink-950 text-paper border-ink-950"
                           : visited || done
@@ -182,7 +172,7 @@ export default function MapScreen() {
                       </span>
                     )}
                   </span>
-                  <span className="mt-1 max-w-[72px] truncate text-[9px] font-medium text-ink-800 bg-paper/85 px-1">
+                  <span className="mt-1 max-w-[72px] truncate rounded-full text-[9px] font-medium text-ink-800 bg-paper/90 px-2 py-0.5 shadow-sm">
                     {stop.title}
                   </span>
                 </button>
@@ -196,7 +186,7 @@ export default function MapScreen() {
             >
               <div className="relative h-4 w-4">
                 <span className="pulse-ring absolute inset-0 text-ink-950/50" />
-                <span className="relative block h-4 w-4 bg-ink-950 ring-2 ring-paper" />
+                <span className="relative block h-4 w-4 rounded-full bg-ink-950 ring-2 ring-paper" />
               </div>
             </div>
           </div>
@@ -206,7 +196,7 @@ export default function MapScreen() {
       )}
 
       {selected && (
-        <div className="absolute inset-x-3 bottom-[130px] bg-paper border border-ink-950 p-4 float-in">
+        <div className="absolute inset-x-3 bottom-[130px] rounded-3xl bg-paper border border-ink-950 p-4 shadow-float float-in">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] text-ink-500 font-mono">{formatTime(selected.timestamp)}</p>
@@ -226,7 +216,7 @@ export default function MapScreen() {
             <button
               type="button"
               onClick={() => jumpToStop(selected)}
-              className="flex-1 bg-ink-950 text-paper text-[13px] font-medium py-2.5"
+              className="flex-1 rounded-full bg-ink-950 text-paper text-[13px] font-medium py-2.5"
             >
               Jump audio here
             </button>
@@ -238,7 +228,7 @@ export default function MapScreen() {
               <button
                 type="button"
                 onClick={() => navigate(`/tour/${tour.id}/ar/${selected.id}`)}
-                className="flex-1 border border-ink-950 text-ink-950 text-[13px] font-medium py-2.5 flex items-center justify-center gap-1"
+                className="flex-1 rounded-full border border-ink-950 text-ink-950 text-[13px] font-medium py-2.5 flex items-center justify-center gap-1"
               >
                 <Sparkles size={13} /> View AR
               </button>
