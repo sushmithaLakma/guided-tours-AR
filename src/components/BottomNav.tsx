@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { ListMusic, Map as MapIcon, Compass } from "lucide-react";
+import { House, ListMusic, Map as MapIcon, Compass } from "lucide-react";
 import { usePlayer } from "../context/PlayerContext";
 
 export default function BottomNav() {
@@ -10,6 +10,7 @@ export default function BottomNav() {
   if (!tour) return null;
 
   const tabs = [
+    { key: "home", label: "Home", icon: House, path: "/" },
     { key: "listen", label: "Listen", icon: Compass, path: `/tour/${tour.id}/listen` },
     { key: "stops", label: "Stops", icon: ListMusic, path: `/tour/${tour.id}` },
     { key: "map", label: "Map", icon: MapIcon, path: `/tour/${tour.id}/map` },

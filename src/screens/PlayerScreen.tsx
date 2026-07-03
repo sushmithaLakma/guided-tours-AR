@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Map as MapIcon, Pause, Play, Rewind, Sparkles, FastForward, SkipBack, SkipForward } from "lucide-react";
+import { Camera, Check, Map as MapIcon, Pause, Play, Rewind, Sparkles, FastForward, SkipBack, SkipForward } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { PLAYBACK_SPEEDS, usePlayer } from "../context/PlayerContext";
+import { useUserData } from "../context/UserDataContext";
 import { formatTime } from "../lib/format";
 import ScreenHeader from "../components/ScreenHeader";
 import BottomNav from "../components/BottomNav";
@@ -11,6 +12,7 @@ export default function PlayerScreen() {
   const { tourId } = useParams();
   const navigate = useNavigate();
   const player = usePlayer();
+  const userData = useUserData();
   const routeTour = getTourById(tourId ?? "");
 
   useEffect(() => {
@@ -21,9 +23,14 @@ export default function PlayerScreen() {
   }, [tourId]);
 
   const tour = player.tour ?? routeTour;
-  if (!tour) return null;
-
   const { elapsed, isPlaying, speed, currentStop, currentStopIndex, hasFinished } = player;
+
+  useEffect(() => {
+    if (currentStop) userData.markVisited(currentStop.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStop?.id]);
+
+  if (!tour) return null;
 
   return (
     <div className="relative h-dvh flex flex-col bg-paper text-ink-950">
@@ -154,6 +161,8 @@ export default function PlayerScreen() {
           <div className="border-t border-ink-950">
             {tour.stops.map((stop, i) => {
               const isCurrent = i === currentStopIndex;
+              const visited = userData.isVisited(stop.id);
+              const hasMemory = userData.getMemories(stop.id).length > 0;
               return (
                 <button
                   key={stop.id}
@@ -167,6 +176,8 @@ export default function PlayerScreen() {
                   <span className={`flex-1 text-[13.5px] truncate ${isCurrent ? "font-serif text-ink-950" : "text-ink-700"}`}>
                     {stop.title}
                   </span>
+                  {hasMemory && <Camera size={12} className="text-ink-500 shrink-0" />}
+                  {visited && <Check size={13} strokeWidth={2.5} className="text-ink-950 shrink-0" />}
                   {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
                   <span className="text-[11px] font-mono text-ink-400 shrink-0">{formatTime(stop.timestamp)}</span>
                 </button>

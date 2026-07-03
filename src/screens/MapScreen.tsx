@@ -1,18 +1,21 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LocateFixed, Minus, Plus, Sparkles, DoorOpen } from "lucide-react";
+import { Heart, LocateFixed, Minus, Plus, Sparkles, DoorOpen } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { usePlayer } from "../context/PlayerContext";
+import { useUserData } from "../context/UserDataContext";
 import { formatTime } from "../lib/format";
 import ScreenHeader from "../components/ScreenHeader";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
+import FavoriteButton from "../components/FavoriteButton";
 import type { Stop } from "../types/tour";
 
 export default function MapScreen() {
   const { tourId } = useParams();
   const navigate = useNavigate();
   const player = usePlayer();
+  const userData = useUserData();
   const routeTour = getTourById(tourId ?? "");
   const tour = player.tour?.id === routeTour?.id ? player.tour : routeTour;
   const [zoom, setZoom] = useState(1);
@@ -98,6 +101,9 @@ export default function MapScreen() {
           {tour.stops.map((stop, i) => {
             const done = isActive && i < player.currentStopIndex;
             const current = isActive && i === player.currentStopIndex;
+            const visited = userData.isVisited(stop.id);
+            const favorite = userData.isFavoriteStop(stop.id);
+            const memories = userData.getMemories(stop.id);
             return (
               <button
                 key={stop.id}
@@ -106,16 +112,22 @@ export default function MapScreen() {
                 className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
                 style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
               >
+                {memories.length > 0 && (
+                  <img src={memories[0].dataUrl} alt="" className="h-4 w-4 object-cover border border-ink-950 -mb-1 z-10" />
+                )}
                 <span
-                  className={`h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
+                  className={`relative h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
                     current
                       ? "bg-ink-950 text-paper border-ink-950"
-                      : done
+                      : visited || done
                         ? "bg-ink-300 text-ink-950 border-ink-950"
                         : "bg-paper text-ink-950 border-ink-950"
                   }`}
                 >
                   {stop.order}
+                  {favorite && (
+                    <Heart size={9} fill="currentColor" className="absolute -top-1.5 -right-1.5 text-ink-950 bg-paper rounded-full p-[1px]" />
+                  )}
                 </span>
                 {stop.hasAR && <Sparkles size={11} className="text-ink-700 -mt-1 bg-paper p-[1px]" />}
               </button>
@@ -181,6 +193,10 @@ export default function MapScreen() {
             >
               Jump audio here
             </button>
+            <FavoriteButton
+              active={userData.isFavoriteStop(selected.id)}
+              onToggle={() => userData.toggleFavoriteStop(selected.id)}
+            />
             {selected.hasAR && (
               <button
                 type="button"

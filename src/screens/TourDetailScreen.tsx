@@ -2,16 +2,22 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Play, Sparkles } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { usePlayer } from "../context/PlayerContext";
+import { useUserData } from "../context/UserDataContext";
 import { formatDuration, formatTime } from "../lib/format";
 import ScreenHeader from "../components/ScreenHeader";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
+import FavoriteButton from "../components/FavoriteButton";
+import CoveredBadge from "../components/CoveredBadge";
+import FeedbackControl from "../components/FeedbackControl";
+import MemoryUpload from "../components/MemoryUpload";
 import type { Stop } from "../types/tour";
 
 export default function TourDetailScreen() {
   const { tourId } = useParams();
   const navigate = useNavigate();
   const player = usePlayer();
+  const userData = useUserData();
   const tour = getTourById(tourId ?? "");
 
   if (!tour) {
@@ -46,7 +52,10 @@ export default function TourDetailScreen() {
         <div className={`aspect-[16/10] bg-gradient-to-br ${tour.gradient} editorial-photo`} />
 
         <div className="px-5 pt-5">
-          <h1 className="font-serif text-[26px] leading-tight text-ink-950">{tour.title}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="font-serif text-[26px] leading-tight text-ink-950">{tour.title}</h1>
+            <FavoriteButton active={userData.isFavoriteTour(tour.id)} onToggle={() => userData.toggleFavoriteTour(tour.id)} />
+          </div>
           <p className="text-[13px] text-ink-600 mt-1.5">{tour.tagline}</p>
 
           <div className="flex items-center gap-1.5 text-[12px] text-ink-500 mt-3 uppercase tracking-wide">
@@ -80,9 +89,10 @@ export default function TourDetailScreen() {
         <ol className="px-5 flex flex-col">
           {tour.stops.map((stop, i) => {
             const isCurrent = isActive && player.currentStop?.id === stop.id;
+            const visited = userData.isVisited(stop.id);
             return (
               <li key={stop.id} className={i > 0 ? "border-t border-ink-200" : ""}>
-                <button type="button" onClick={() => openAtStop(stop)} className="flex gap-4 text-left w-full py-4">
+                <div className="flex gap-4 py-4">
                   <span
                     className={`shrink-0 text-[13px] font-mono pt-0.5 ${
                       isCurrent ? "text-ink-950 font-semibold" : "text-ink-400"
@@ -90,20 +100,38 @@ export default function TourDetailScreen() {
                   >
                     {String(stop.order).padStart(2, "0")}
                   </span>
-                  <span className="flex-1">
-                    <span className="flex items-center gap-1.5">
-                      <span className={`text-[15px] font-serif ${isCurrent ? "text-ink-950" : "text-ink-900"}`}>
-                        {stop.title}
+                  <div className="flex-1">
+                    <button type="button" onClick={() => openAtStop(stop)} className="text-left w-full">
+                      <span className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`text-[15px] font-serif ${isCurrent ? "text-ink-950" : "text-ink-900"}`}>
+                          {stop.title}
+                        </span>
+                        {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
+                        {isCurrent && (
+                          <span className="text-[9px] uppercase tracking-wide border border-ink-950 px-1.5 py-0.5">Now</span>
+                        )}
+                        {visited && <CoveredBadge />}
                       </span>
-                      {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
-                      {isCurrent && <span className="text-[9px] uppercase tracking-wide border border-ink-950 px-1.5 py-0.5">Now</span>}
-                    </span>
-                    <span className="block text-[12.5px] text-ink-500 mt-0.5 leading-snug">{stop.teaser}</span>
-                    <span className="block text-[11px] text-ink-400 mt-1.5 font-mono uppercase tracking-wide">
-                      {formatTime(stop.timestamp)} · {formatDuration(stop.duration)}
-                    </span>
-                  </span>
-                </button>
+                      <span className="block text-[12.5px] text-ink-500 mt-0.5 leading-snug">{stop.teaser}</span>
+                      <span className="block text-[11px] text-ink-400 mt-1.5 font-mono uppercase tracking-wide">
+                        {formatTime(stop.timestamp)} · {formatDuration(stop.duration)}
+                      </span>
+                    </button>
+
+                    <div className="flex items-center gap-3 mt-2.5">
+                      <FavoriteButton
+                        active={userData.isFavoriteStop(stop.id)}
+                        onToggle={() => userData.toggleFavoriteStop(stop.id)}
+                        size="sm"
+                      />
+                      <FeedbackControl stopId={stop.id} stopTitle={stop.title} />
+                    </div>
+
+                    <div className="mt-2.5">
+                      <MemoryUpload stopId={stop.id} />
+                    </div>
+                  </div>
+                </div>
               </li>
             );
           })}

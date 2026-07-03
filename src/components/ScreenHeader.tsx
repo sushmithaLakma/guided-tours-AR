@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, House } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
@@ -7,27 +7,29 @@ export default function ScreenHeader({
   onBack,
   transparent,
   right,
+  hideHome,
 }: {
   title?: string;
   onBack?: () => void;
   transparent?: boolean;
   right?: ReactNode;
+  hideHome?: boolean;
 }) {
   const navigate = useNavigate();
+  const buttonClass = transparent
+    ? "bg-ink-950/45 text-ink-50 border-ink-50/40 backdrop-blur-sm"
+    : "bg-ink-100 text-ink-950 border-ink-950";
+
   return (
     <header
-      className={`sticky top-0 z-20 flex items-center gap-3 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+12px)] ${
+      className={`sticky top-0 z-20 flex items-center gap-2 px-4 py-3 pt-[calc(env(safe-area-inset-top,0px)+12px)] ${
         transparent ? "" : "bg-paper border-b border-ink-950"
       }`}
     >
       <button
         type="button"
         onClick={() => (onBack ? onBack() : navigate(-1))}
-        className={`h-9 w-9 shrink-0 flex items-center justify-center border ${
-          transparent
-            ? "bg-ink-950/45 text-ink-50 border-ink-50/40 backdrop-blur-sm"
-            : "bg-ink-100 text-ink-950 border-ink-950"
-        }`}
+        className={`h-9 w-9 shrink-0 flex items-center justify-center border ${buttonClass}`}
         aria-label="Go back"
       >
         <ArrowLeft size={17} />
@@ -41,7 +43,18 @@ export default function ScreenHeader({
           {title}
         </h1>
       )}
+      {!title && <span className="flex-1" />}
       {right}
+      {!hideHome && (
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className={`h-9 w-9 shrink-0 flex items-center justify-center border ${buttonClass}`}
+          aria-label="Go to home screen"
+        >
+          <House size={16} />
+        </button>
+      )}
     </header>
   );
 }

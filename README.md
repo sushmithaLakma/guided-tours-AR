@@ -59,3 +59,4 @@ src/
 
 - Audio playback is simulated (an internal clock advances "elapsed time" at the selected speed) rather than streaming real audio files, since no narration recordings exist yet — the entire transport/seek/speed/chapter UX is real and wired end-to-end, ready to swap in an `<audio>`/HLS backend.
 - Map and AR are stylized mockups (SVG route + CSS gradients) rather than a live maps SDK or WebXR session, so the prototype has zero external API-key or network dependencies and runs anywhere. The interaction model (pins, live position, tap-to-jump, camera-with-fallback) is what would carry over to a production maps/AR integration.
+- Favorites, feedback, visited stops, and memory photos persist to the browser's `localStorage` (see `src/context/UserDataContext.tsx`) — single device, no account or backend sync. A production version would move this to a per-user account so memories and visited history follow a traveller across devices.

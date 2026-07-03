@@ -2,15 +2,24 @@ import { useNavigate } from "react-router-dom";
 import { ArrowUpRight, Star } from "lucide-react";
 import type { Tour } from "../types/tour";
 import { formatDuration } from "../lib/format";
+import { useUserData } from "../context/UserDataContext";
+import FavoriteButton from "./FavoriteButton";
 
 export default function TourCard({ tour }: { tour: Tour }) {
   const navigate = useNavigate();
+  const userData = useUserData();
+  const visitedCount = userData.visitedCountForStops(tour.stops.map((s) => s.id));
+  const open = () => navigate(`/tour/${tour.id}`);
 
   return (
-    <button
-      type="button"
-      onClick={() => navigate(`/tour/${tour.id}`)}
-      className="w-full text-left group"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") open();
+      }}
+      className="w-full text-left group cursor-pointer"
     >
       <div className={`relative aspect-[16/10] bg-gradient-to-br ${tour.gradient} editorial-photo`}>
         {tour.stops.some((s) => s.hasAR) && (
@@ -18,6 +27,13 @@ export default function TourCard({ tour }: { tour: Tour }) {
             AR waypoints
           </span>
         )}
+        <span className="absolute top-2 right-2">
+          <FavoriteButton
+            active={userData.isFavoriteTour(tour.id)}
+            onToggle={() => userData.toggleFavoriteTour(tour.id)}
+            size="sm"
+          />
+        </span>
       </div>
       <div className="pt-3">
         <h3 className="font-serif text-[19px] leading-snug text-ink-950">{tour.title}</h3>
@@ -30,12 +46,18 @@ export default function TourCard({ tour }: { tour: Tour }) {
             <span className="capitalize">{tour.pace}</span>
             <span aria-hidden>▪</span>
             {formatDuration(tour.totalDuration)}
+            {visitedCount > 0 && (
+              <>
+                <span aria-hidden>▪</span>
+                {visitedCount}/{tour.stops.length} visited
+              </>
+            )}
           </span>
           <span className="h-7 w-7 shrink-0 flex items-center justify-center bg-ink-100 border border-ink-950 group-active:bg-ink-950 group-active:text-paper transition-colors">
             <ArrowUpRight size={14} />
           </span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
