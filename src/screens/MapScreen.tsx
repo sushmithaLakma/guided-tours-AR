@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LocateFixed, Minus, Plus, Sparkles, DoorOpen } from "lucide-react";
+import { Sparkles, DoorOpen, Check } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { usePlayer } from "../context/PlayerContext";
 import { useUserData } from "../context/UserDataContext";
@@ -9,7 +9,16 @@ import ScreenHeader from "../components/ScreenHeader";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
 import FavoriteButton from "../components/FavoriteButton";
+import MapListToggle from "../components/MapListToggle";
+import FilterChipRow from "../components/FilterChipRow";
+import MapZoomControls from "../components/MapZoomControls";
 import type { Stop } from "../types/tour";
+
+const FILTERS = [
+  { key: "all", label: "All stops" },
+  { key: "ar", label: "AR waypoints" },
+  { key: "visited", label: "Visited" },
+];
 
 export default function MapScreen() {
   const { tourId } = useParams();
@@ -19,6 +28,8 @@ export default function MapScreen() {
   const routeTour = getTourById(tourId ?? "");
   const tour = player.tour?.id === routeTour?.id ? player.tour : routeTour;
   const [zoom, setZoom] = useState(1);
+  const [mode, setMode] = useState<"map" | "list">("map");
+  const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Stop | null>(null);
   const isActive = !!tour && player.tour?.id === tour.id;
 
@@ -41,6 +52,15 @@ export default function MapScreen() {
 
   if (!tour) return null;
 
+  const matchesFilter = (stop: Stop) =>
+    filter === "all" || (filter === "ar" && stop.hasAR) || (filter === "visited" && userData.isVisited(stop.id));
+
+  const jumpToStop = (stop: Stop) => {
+    if (isActive) player.skipToStop(stop.id);
+    else player.loadTour(tour, { startAt: stop.timestamp, autoplay: false });
+    navigate(`/tour/${tour.id}/listen`);
+  };
+
   const routePath = tour.stops.map((s) => `${s.x},${s.y}`).join(" ");
   const exitPoint = {
     x: Math.min(Math.max(tour.stops[0].x - 10, 24), 76),
@@ -51,110 +71,139 @@ export default function MapScreen() {
     <div className="relative h-dvh flex flex-col bg-paper">
       <ScreenHeader title="Route map" />
 
-      <div className="flex-1 relative overflow-auto no-scrollbar bg-ink-50 touch-pan-x touch-pan-y">
-        <div
-          className="relative origin-top-left transition-transform duration-200"
-          style={{ width: "100%", height: "100%", transform: `scale(${zoom})` }}
-        >
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-            <defs>
-              <pattern id="streets" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
-                <path d="M0 4.5 H9" stroke="#d8d2c6" strokeWidth="0.35" />
-                <path d="M4.5 0 V9" stroke="#d8d2c6" strokeWidth="0.35" />
-              </pattern>
-            </defs>
-            <rect width="100" height="100" fill="url(#streets)" opacity="0.6" />
-            <ellipse cx="14" cy="78" rx="16" ry="12" fill="#dedad0" opacity="0.9" />
-            <ellipse cx="90" cy="20" rx="14" ry="16" fill="#d8d2c6" opacity="0.7" />
+      <div className="flex items-center justify-between px-5 py-3 border-b border-ink-950">
+        <MapListToggle mode={mode} onChange={setMode} />
+      </div>
+      <div className="border-b border-ink-950">
+        <FilterChipRow options={FILTERS} active={filter} onChange={setFilter} />
+      </div>
 
-            <polyline
-              points={routePath}
-              fill="none"
-              stroke="#17140f"
-              strokeWidth="0.6"
-              strokeDasharray="2.4 1.6"
-              strokeLinecap="square"
-            />
-            <polyline
-              points={`${exitPoint.x},${exitPoint.y} ${tour.stops[0].x},${tour.stops[0].y}`}
-              fill="none"
-              stroke="#7d7266"
-              strokeWidth="0.5"
-              strokeDasharray="1.2 1.4"
-              strokeLinecap="square"
-            />
-          </svg>
-
-          {/* exit marker */}
-          <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
-            style={{ left: `${exitPoint.x}%`, top: `${exitPoint.y}%` }}
-          >
-            <div className="h-6 w-6 bg-paper border border-ink-950 text-ink-950 flex items-center justify-center">
-              <DoorOpen size={13} />
-            </div>
-            <span className="mt-1 border border-ink-950 bg-paper px-1.5 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
-              Quick exit
-            </span>
-          </div>
-
-          {tour.stops.map((stop, i) => {
-            const done = isActive && i < player.currentStopIndex;
-            const current = isActive && i === player.currentStopIndex;
+      {mode === "list" ? (
+        <main className="flex-1 overflow-y-auto no-scrollbar pb-36">
+          {tour.stops.filter(matchesFilter).map((stop, i) => {
             const visited = userData.isVisited(stop.id);
             return (
               <button
                 key={stop.id}
                 type="button"
-                onClick={() => setSelected(stop)}
-                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
-                style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
+                onClick={() => jumpToStop(stop)}
+                className={`flex items-center gap-3 w-full px-5 py-4 text-left ${i > 0 ? "border-t border-ink-200" : ""}`}
               >
-                <span
-                  className={`h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
-                    current
-                      ? "bg-ink-950 text-paper border-ink-950"
-                      : visited || done
-                        ? "bg-ink-300 text-ink-950 border-ink-950"
-                        : "bg-paper text-ink-950 border-ink-950"
-                  }`}
-                >
-                  {stop.order}
+                <span className="text-[13px] font-mono text-ink-400 w-5 shrink-0">{String(stop.order).padStart(2, "0")}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-[14.5px] font-serif text-ink-950 truncate">{stop.title}</span>
+                    {stop.hasAR && <Sparkles size={12} className="text-terracotta-500 shrink-0" />}
+                    {visited && <Check size={13} strokeWidth={2.5} className="text-ink-950 shrink-0" />}
+                  </span>
+                  <span className="block text-[12px] text-ink-500 truncate">{stop.teaser}</span>
                 </span>
-                {stop.hasAR && <Sparkles size={11} className="text-ink-700 -mt-1 bg-paper p-[1px]" />}
+                <span className="text-[11px] font-mono text-ink-400 shrink-0">{formatTime(stop.timestamp)}</span>
               </button>
             );
           })}
-
-          {/* you-are-here marker */}
+        </main>
+      ) : (
+        <div className="flex-1 relative overflow-auto no-scrollbar bg-ink-50 touch-pan-x touch-pan-y">
           <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-            style={{ left: `${userPos.x}%`, top: `${userPos.y}%` }}
+            className="relative origin-top-left transition-transform duration-200"
+            style={{ width: "100%", height: "100%", transform: `scale(${zoom})` }}
           >
-            <div className="relative h-4 w-4">
-              <span className="pulse-ring absolute inset-0 text-ink-950/50" />
-              <span className="relative block h-4 w-4 bg-ink-950 ring-2 ring-paper" />
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <defs>
+                <pattern id="streets" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+                  <path d="M0 4.5 H9" stroke="#d8d2c6" strokeWidth="0.35" />
+                  <path d="M4.5 0 V9" stroke="#d8d2c6" strokeWidth="0.35" />
+                </pattern>
+              </defs>
+              <rect width="100" height="100" fill="url(#streets)" opacity="0.6" />
+              <ellipse cx="14" cy="78" rx="16" ry="12" fill="#dedad0" opacity="0.9" />
+              <ellipse cx="90" cy="20" rx="14" ry="16" fill="#d8d2c6" opacity="0.7" />
+
+              <polyline
+                points={routePath}
+                fill="none"
+                stroke="#17140f"
+                strokeWidth="0.6"
+                strokeDasharray="2.4 1.6"
+                strokeLinecap="square"
+              />
+              <polyline
+                points={`${exitPoint.x},${exitPoint.y} ${tour.stops[0].x},${tour.stops[0].y}`}
+                fill="none"
+                stroke="#7d7266"
+                strokeWidth="0.5"
+                strokeDasharray="1.2 1.4"
+                strokeLinecap="square"
+              />
+            </svg>
+
+            {/* exit marker */}
+            <div
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
+              style={{ left: `${exitPoint.x}%`, top: `${exitPoint.y}%` }}
+            >
+              <div className="h-6 w-6 bg-paper border border-ink-950 text-ink-950 flex items-center justify-center">
+                <DoorOpen size={13} />
+              </div>
+              <span className="mt-1 border border-ink-950 bg-paper px-1.5 py-0.5 text-[9px] font-medium text-ink-800 whitespace-nowrap uppercase">
+                Quick exit
+              </span>
+            </div>
+
+            {tour.stops.map((stop, i) => {
+              const done = isActive && i < player.currentStopIndex;
+              const current = isActive && i === player.currentStopIndex;
+              const visited = userData.isVisited(stop.id);
+              const dimmed = !matchesFilter(stop);
+              return (
+                <button
+                  key={stop.id}
+                  type="button"
+                  onClick={() => setSelected(stop)}
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-opacity ${dimmed ? "opacity-30" : ""}`}
+                  style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
+                >
+                  <span className="relative">
+                    <span
+                      className={`h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
+                        current
+                          ? "bg-ink-950 text-paper border-ink-950"
+                          : visited || done
+                            ? "bg-ink-300 text-ink-950 border-ink-950"
+                            : "bg-paper text-ink-950 border-ink-950"
+                      }`}
+                    >
+                      {stop.order}
+                    </span>
+                    {stop.hasAR && (
+                      <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full bg-terracotta-500 border border-paper flex items-center justify-center">
+                        <Sparkles size={8} className="text-paper" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="mt-1 max-w-[72px] truncate text-[9px] font-medium text-ink-800 bg-paper/85 px-1">
+                    {stop.title}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* you-are-here marker */}
+            <div
+              className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+              style={{ left: `${userPos.x}%`, top: `${userPos.y}%` }}
+            >
+              <div className="relative h-4 w-4">
+                <span className="pulse-ring absolute inset-0 text-ink-950/50" />
+                <span className="relative block h-4 w-4 bg-ink-950 ring-2 ring-paper" />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="absolute right-3 top-[calc(env(safe-area-inset-top,0px)+64px)] flex flex-col bg-paper border border-ink-950 overflow-hidden">
-        <button type="button" className="p-2.5 border-b border-ink-950" onClick={() => setZoom((z) => Math.min(z + 0.4, 2.2))} aria-label="Zoom in">
-          <Plus size={16} />
-        </button>
-        <button type="button" className="p-2.5" onClick={() => setZoom((z) => Math.max(z - 0.4, 1))} aria-label="Zoom out">
-          <Minus size={16} />
-        </button>
-      </div>
-      <button
-        type="button"
-        onClick={() => setZoom(1)}
-        className="absolute right-3 bottom-[calc(env(safe-area-inset-bottom,0px)+130px)] p-2.5 bg-paper border border-ink-950"
-        aria-label="Recenter"
-      >
-        <LocateFixed size={16} className="text-ink-950" />
-      </button>
+          <MapZoomControls zoom={zoom} setZoom={setZoom} />
+        </div>
+      )}
 
       {selected && (
         <div className="absolute inset-x-3 bottom-[130px] bg-paper border border-ink-950 p-4 float-in">
@@ -176,11 +225,7 @@ export default function MapScreen() {
           <div className="flex gap-2 mt-3">
             <button
               type="button"
-              onClick={() => {
-                if (isActive) player.skipToStop(selected.id);
-                else player.loadTour(tour, { startAt: selected.timestamp, autoplay: false });
-                navigate(`/tour/${tour.id}/listen`);
-              }}
+              onClick={() => jumpToStop(selected)}
               className="flex-1 bg-ink-950 text-paper text-[13px] font-medium py-2.5"
             >
               Jump audio here
