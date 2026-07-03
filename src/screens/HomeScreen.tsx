@@ -17,24 +17,26 @@ export default function HomeScreen() {
 
   return (
     <div className="relative h-dvh flex flex-col bg-paper">
-      <div className="flex items-center gap-2 px-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] pb-2">
-        <span className="h-6 w-6 flex items-center justify-center border border-ink-950 bg-ink-950 text-paper text-[11px] font-medium uppercase shrink-0">
-          {firstName.charAt(0) || "?"}
-        </span>
-        <span className="text-[12px] text-ink-600 truncate">Hi, {firstName}</span>
-      </div>
+      <div className="flex items-center justify-between gap-3 px-5 pt-[calc(env(safe-area-inset-top,0px)+14px)] pb-3 border-b border-ink-950">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="h-7 w-7 flex items-center justify-center border border-ink-950 bg-ink-950 text-paper text-[12px] font-medium uppercase shrink-0">
+            {firstName.charAt(0) || "?"}
+          </span>
+          <span className="text-[13.5px] font-medium text-ink-950 truncate">Hi, {firstName}</span>
+        </div>
 
-      <div className="flex items-center justify-between px-5 pb-4 border-b border-ink-950">
-        <span className="font-serif text-[20px] text-ink-950">Wayfare</span>
-        <button
-          type="button"
-          onClick={locateMe}
-          disabled={locating}
-          className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-ink-500 disabled:opacity-60"
-        >
-          <LocateFixed size={13} className={locating ? "animate-pulse" : ""} />
-          {locating ? "Locating…" : userLocation ? `Near ${activeCity.name}` : "Use my location"}
-        </button>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className="font-serif text-[16px] leading-none text-ink-950">Wayfare</span>
+          <button
+            type="button"
+            onClick={locateMe}
+            disabled={locating}
+            className="flex items-center gap-1 text-[9.5px] uppercase tracking-wide text-ink-500 disabled:opacity-60"
+          >
+            <LocateFixed size={10} className={locating ? "animate-pulse" : ""} />
+            {locating ? "Locating…" : userLocation ? `Near ${activeCity.name}` : "Use my location"}
+          </button>
+        </div>
       </div>
 
       {locationError && (
