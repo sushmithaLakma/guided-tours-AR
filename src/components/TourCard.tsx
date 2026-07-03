@@ -22,7 +22,7 @@ export default function TourCard({ tour }: { tour: Tour }) {
       }}
       className="w-full text-left group cursor-pointer"
     >
-      <PhotoBlock gradient={tour.gradient} className="aspect-[16/10]">
+      <PhotoBlock gradient={tour.gradient} seed={tour.id} className="aspect-[16/10]">
         {tour.stops.some((s) => s.hasAR) && (
           <span className="absolute z-10 top-0 left-0 border border-ink-950 bg-paper px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-ink-950">
             AR waypoints

@@ -48,7 +48,7 @@ export default function TourDetailScreen() {
       <ScreenHeader />
 
       <main className={`flex-1 overflow-y-auto no-scrollbar ${isActive ? "pb-40" : player.tour ? "pb-56" : "pb-40"}`}>
-        <PhotoBlock gradient={tour.gradient} className="aspect-[16/10]" />
+        <PhotoBlock gradient={tour.gradient} seed={tour.id} className="aspect-[16/10]" />
 
         <div className="px-5 pt-5">
           <div className="flex items-start justify-between gap-3">

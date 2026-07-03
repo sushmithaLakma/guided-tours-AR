@@ -6,7 +6,7 @@ export default function PlaceCard({ place }: { place: Place }) {
   const Icon = place.category === "market" ? Store : UtensilsCrossed;
   return (
     <div className="w-full">
-      <PhotoBlock gradient={place.gradient} className="aspect-[4/3]">
+      <PhotoBlock gradient={place.gradient} seed={place.id} className="aspect-[4/3]">
         <span className="absolute z-10 bottom-0 left-0 h-6 w-6 flex items-center justify-center bg-paper border-t border-r border-ink-950">
           <Icon size={12} className="text-ink-950" />
         </span>

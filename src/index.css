@@ -104,12 +104,13 @@ button {
   scrollbar-width: none;
 }
 
-/* Mutes tour gradients into a moody duotone so placeholder art reads as editorial photography */
+/* Mutes photos/gradients into a moody duotone so imagery reads as editorial photography */
 .editorial-photo {
-  filter: grayscale(0.5) sepia(0.12) contrast(1.08) brightness(0.94);
+  filter: grayscale(0.35) sepia(0.1) contrast(1.05) brightness(0.96);
 }
 
-/* Film grain + vignette so gradient placeholders read as real, slightly imperfect photographs */
+/* Film grain + vignette layered over real photos (or the gradient fallback) for a filmic finish.
+   z-index:1 keeps both above the <img> — a positioned z-index:auto sibling — regardless of DOM order. */
 .photo-grain {
   position: relative;
   overflow: hidden;
@@ -118,18 +119,20 @@ button {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
-  opacity: 0.3;
+  opacity: 0.22;
   mix-blend-mode: overlay;
 }
 .photo-grain::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(23, 20, 15, 0.38) 100%);
+  background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(23, 20, 15, 0.32) 100%);
 }
 
 @keyframes pulse-ring {

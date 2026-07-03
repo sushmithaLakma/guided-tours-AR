@@ -59,6 +59,7 @@ export default function PlayerScreen() {
       <main className="flex-1 overflow-y-auto no-scrollbar pb-24">
         <PhotoBlock
           gradient={currentStop?.photo ?? tour.gradient}
+          seed={currentStop?.id ?? tour.id}
           className="aspect-square relative flex flex-col justify-end p-5"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950/55 via-transparent to-transparent" />

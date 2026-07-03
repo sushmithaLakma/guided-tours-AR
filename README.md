@@ -40,7 +40,7 @@ There's no per-stop rating friction — `PlayerScreen` tracks when every stop in
 **AR is scoped to a few high-value waypoints, not the whole tour.**
 Stops flagged `hasAR` (castle gates, viewpoints, temple pagodas) open a camera-style overlay (`ARScreen`) with floating annotations a traveller can tap for more detail. It attempts a real device camera via `getUserMedia` and falls back to a styled placeholder when no camera is available (e.g. this preview environment) — narration keeps playing underneath, reinforcing that AR is a layer on top of the tour, not a separate mode.
 
-**Visual language:** a warm, editorial "travel journal" palette (terracotta / sage / paper) instead of typical map-app blues and greens, `Fraunces` serif for titles against `Inter` for UI — meant to feel closer to a printed guidebook than software chrome. Photography throughout (`PhotoBlock`) carries a film-grain + vignette treatment (pure CSS/SVG, no image assets) so placeholder art reads as a real, slightly imperfect photograph rather than a flat gradient.
+**Visual language:** a warm, editorial "travel journal" palette (terracotta / sage / paper) instead of typical map-app blues and greens, `Fraunces` serif for titles against `Inter` for UI — meant to feel closer to a printed guidebook than software chrome. Every tour, stop, and place card shows a real photograph (`PhotoBlock`, `src/lib/photo.ts`) rather than an abstract placeholder, run through a shared duotone + film-grain + vignette treatment so the photography reads as one consistent, slightly imperfect analog set instead of stock-photo gloss.
 
 ## Structure
 
@@ -68,5 +68,6 @@ src/
 ## Notes on the prototype
 
 - Audio playback is simulated (an internal clock advances "elapsed time" at the selected speed) rather than streaming real audio files, since no narration recordings exist yet — the entire transport/seek/speed/chapter UX is real and wired end-to-end, ready to swap in an `<audio>`/HLS backend.
-- Map and AR are stylized mockups (SVG route + CSS gradients) rather than a live maps SDK or WebXR session, so the prototype has zero external API-key or network dependencies and runs anywhere. The interaction model (pins, live position, tap-to-jump, camera-with-fallback) is what would carry over to a production maps/AR integration.
+- Map and AR are stylized mockups (SVG route + CSS gradients) rather than a live maps SDK or WebXR session. The interaction model (pins, live position, tap-to-jump, camera-with-fallback) is what would carry over to a production maps/AR integration.
+- Card and hero photography loads from Lorem Picsum (`src/lib/photo.ts`), seeded deterministically per tour/stop/place id — real photographs rather than illustrative placeholders, at the cost of one external dependency (no API key needed). `PhotoBlock` falls back to the tour's gradient if an image ever fails to load, so a network hiccup degrades gracefully instead of showing a broken image. A production version would swap this for licensed or on-location photography per destination.
 - Favorite tours, visited stops, and per-tour feedback persist to the browser's `localStorage` (see `src/context/UserDataContext.tsx`) — single device, no account or backend sync. A production version would move this to a per-user account so history follows a traveller across devices.
