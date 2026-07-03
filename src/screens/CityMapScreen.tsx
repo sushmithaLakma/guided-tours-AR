@@ -53,8 +53,6 @@ export default function CityMapScreen() {
           {tours.flatMap((tour) =>
             tour.stops.map((stop) => {
               const visited = userData.isVisited(stop.id);
-              const favorite = userData.isFavoriteStop(stop.id);
-              const memories = userData.getMemories(stop.id);
               return (
                 <button
                   key={stop.id}
@@ -63,22 +61,11 @@ export default function CityMapScreen() {
                   className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
                   style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
                 >
-                  {memories.length > 0 && (
-                    <img
-                      src={memories[0].dataUrl}
-                      alt=""
-                      className="h-4 w-4 object-cover border border-ink-950 -mb-1 z-10"
-                    />
-                  )}
                   <span
-                    className={`relative h-5 w-5 flex items-center justify-center border border-ink-950 ${
+                    className={`h-5 w-5 flex items-center justify-center border border-ink-950 ${
                       visited ? "bg-ink-950" : "bg-paper"
                     }`}
-                  >
-                    {favorite && (
-                      <Heart size={9} fill="currentColor" className="absolute -top-1.5 -right-1.5 text-ink-950 bg-paper rounded-full p-[1px]" />
-                    )}
-                  </span>
+                  />
                 </button>
               );
             })
@@ -161,11 +148,11 @@ export default function CityMapScreen() {
             </button>
             <button
               type="button"
-              onClick={() => userData.toggleFavoriteStop(selected.stop.id)}
+              onClick={() => userData.toggleFavoriteTour(selected.tour.id)}
               className="h-11 w-11 shrink-0 border border-ink-950 flex items-center justify-center"
-              aria-label={userData.isFavoriteStop(selected.stop.id) ? "Remove from favorites" : "Add to favorites"}
+              aria-label={userData.isFavoriteTour(selected.tour.id) ? "Remove tour from favorites" : "Add tour to favorites"}
             >
-              <Heart size={16} fill={userData.isFavoriteStop(selected.stop.id) ? "currentColor" : "none"} />
+              <Heart size={16} fill={userData.isFavoriteTour(selected.tour.id) ? "currentColor" : "none"} />
             </button>
             {selected.stop.hasAR && (
               <button

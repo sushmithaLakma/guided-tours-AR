@@ -1,31 +1,29 @@
-import { useMemo } from "react";
 import { cities } from "../data/cities";
-import { getToursByCity } from "../data/tours";
-import TourCard from "../components/TourCard";
+import { getPlacesByCity } from "../data/places";
+import { useCity } from "../context/CityContext";
+import PlaceCard from "../components/PlaceCard";
 import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
-import { useCity } from "../context/CityContext";
 
-export default function HomeScreen() {
+export default function EateriesScreen() {
   const { cityId, setCityId } = useCity();
   const activeCity = cities.find((c) => c.id === cityId)!;
-  const tourList = useMemo(() => getToursByCity(cityId), [cityId]);
+  const placeList = getPlacesByCity(cityId);
 
   return (
     <div className="relative h-dvh flex flex-col bg-paper">
       <div className="flex items-center justify-between px-5 py-4 pt-[calc(env(safe-area-inset-top,0px)+16px)] border-b border-ink-950">
-        <span className="font-serif text-[20px] text-ink-950">Wayfare</span>
-        <span className="text-[11px] uppercase tracking-wide text-ink-500">Solo travel</span>
+        <span className="font-serif text-[20px] text-ink-950">Eateries</span>
       </div>
 
       <header className="px-5 pt-8 pb-6">
         <h1 className="font-serif text-[38px] leading-[1.05] text-ink-950 tracking-tight">
-          Explore
+          Eat &amp; shop
           <br />
-          {activeCity.name}.
+          in {activeCity.name}.
         </h1>
-        <p className="text-[13px] text-ink-600 mt-3 max-w-[30ch]">
-          Self-guided audio tours built for solo travellers — pause, rewind or linger, whenever you like.
+        <p className="text-[13px] text-ink-600 mt-3 max-w-[32ch]">
+          A short list of places worth the detour, picked to sit near the tour routes.
         </p>
       </header>
 
@@ -48,14 +46,15 @@ export default function HomeScreen() {
       </div>
 
       <main className="flex-1 overflow-y-auto no-scrollbar px-5 pb-36">
-        <p className="text-[11px] uppercase tracking-wide text-ink-400 font-medium mt-4 mb-1">
-          {tourList.length} guided tour{tourList.length === 1 ? "" : "s"} in {activeCity.name}
-        </p>
-        {tourList.map((t, i) => (
-          <div key={t.id} className={i > 0 ? "border-t border-ink-200" : ""}>
-            <TourCard tour={t} />
+        {placeList.length === 0 ? (
+          <p className="text-[13px] text-ink-500 py-6 text-center">No eateries listed for {activeCity.name} yet.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 mt-5">
+            {placeList.map((p) => (
+              <PlaceCard key={p.id} place={p} />
+            ))}
           </div>
-        ))}
+        )}
       </main>
 
       <MiniPlayer />

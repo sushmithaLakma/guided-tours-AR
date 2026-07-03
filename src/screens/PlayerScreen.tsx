@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Camera, Check, Map as MapIcon, Pause, Play, Rewind, Sparkles, FastForward, SkipBack, SkipForward } from "lucide-react";
+import { Check, Map as MapIcon, Pause, Play, Rewind, Sparkles, FastForward, SkipBack, SkipForward } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { PLAYBACK_SPEEDS, usePlayer } from "../context/PlayerContext";
 import { useUserData } from "../context/UserDataContext";
 import { formatTime } from "../lib/format";
 import ScreenHeader from "../components/ScreenHeader";
 import BottomNav from "../components/BottomNav";
+import PhotoBlock from "../components/PhotoBlock";
+import TourFeedbackDrawer from "../components/TourFeedbackDrawer";
 
 export default function PlayerScreen() {
   const { tourId } = useParams();
@@ -14,6 +16,7 @@ export default function PlayerScreen() {
   const player = usePlayer();
   const userData = useUserData();
   const routeTour = getTourById(tourId ?? "");
+  const [feedbackDismissed, setFeedbackDismissed] = useState(false);
 
   useEffect(() => {
     if (routeTour && player.tour?.id !== routeTour.id) {
@@ -29,6 +32,11 @@ export default function PlayerScreen() {
     if (currentStop) userData.markVisited(currentStop.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStop?.id]);
+
+  const allStopsVisited = tour ? userData.visitedCountForStops(tour.stops.map((s) => s.id)) === tour.stops.length : false;
+  const showFeedbackDrawer = Boolean(
+    tour && allStopsVisited && !feedbackDismissed && !userData.getFeedback(tour.id)
+  );
 
   if (!tour) return null;
 
@@ -49,10 +57,9 @@ export default function PlayerScreen() {
       />
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-24">
-        <div
-          className={`aspect-square bg-gradient-to-br ${
-            currentStop?.photo ?? tour.gradient
-          } editorial-photo relative flex flex-col justify-end p-5`}
+        <PhotoBlock
+          gradient={currentStop?.photo ?? tour.gradient}
+          className="aspect-square relative flex flex-col justify-end p-5"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-ink-950/55 via-transparent to-transparent" />
           {hasFinished && (
@@ -86,7 +93,7 @@ export default function PlayerScreen() {
               </button>
             )}
           </div>
-        </div>
+        </PhotoBlock>
 
         <div className="px-6 pt-6">
           <Scrubber />
@@ -162,7 +169,6 @@ export default function PlayerScreen() {
             {tour.stops.map((stop, i) => {
               const isCurrent = i === currentStopIndex;
               const visited = userData.isVisited(stop.id);
-              const hasMemory = userData.getMemories(stop.id).length > 0;
               return (
                 <button
                   key={stop.id}
@@ -176,7 +182,6 @@ export default function PlayerScreen() {
                   <span className={`flex-1 text-[13.5px] truncate ${isCurrent ? "font-serif text-ink-950" : "text-ink-700"}`}>
                     {stop.title}
                   </span>
-                  {hasMemory && <Camera size={12} className="text-ink-500 shrink-0" />}
                   {visited && <Check size={13} strokeWidth={2.5} className="text-ink-950 shrink-0" />}
                   {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
                   <span className="text-[11px] font-mono text-ink-400 shrink-0">{formatTime(stop.timestamp)}</span>
@@ -188,6 +193,13 @@ export default function PlayerScreen() {
       </main>
 
       <BottomNav />
+
+      <TourFeedbackDrawer
+        tourId={tour.id}
+        tourTitle={tour.title}
+        open={showFeedbackDrawer}
+        onClose={() => setFeedbackDismissed(true)}
+      />
     </div>
   );
 }

@@ -9,8 +9,7 @@ import MiniPlayer from "../components/MiniPlayer";
 import BottomNav from "../components/BottomNav";
 import FavoriteButton from "../components/FavoriteButton";
 import CoveredBadge from "../components/CoveredBadge";
-import FeedbackControl from "../components/FeedbackControl";
-import MemoryUpload from "../components/MemoryUpload";
+import PhotoBlock from "../components/PhotoBlock";
 import type { Stop } from "../types/tour";
 
 export default function TourDetailScreen() {
@@ -48,8 +47,8 @@ export default function TourDetailScreen() {
     <div className="relative h-dvh flex flex-col bg-paper">
       <ScreenHeader />
 
-      <main className={`flex-1 overflow-y-auto no-scrollbar ${isActive ? "pb-40" : player.tour ? "pb-56" : "pb-28"}`}>
-        <div className={`aspect-[16/10] bg-gradient-to-br ${tour.gradient} editorial-photo`} />
+      <main className={`flex-1 overflow-y-auto no-scrollbar ${isActive ? "pb-40" : player.tour ? "pb-56" : "pb-40"}`}>
+        <PhotoBlock gradient={tour.gradient} className="aspect-[16/10]" />
 
         <div className="px-5 pt-5">
           <div className="flex items-start justify-between gap-3">
@@ -92,7 +91,7 @@ export default function TourDetailScreen() {
             const visited = userData.isVisited(stop.id);
             return (
               <li key={stop.id} className={i > 0 ? "border-t border-ink-200" : ""}>
-                <div className="flex gap-4 py-4">
+                <button type="button" onClick={() => openAtStop(stop)} className="flex gap-4 py-4 text-left w-full">
                   <span
                     className={`shrink-0 text-[13px] font-mono pt-0.5 ${
                       isCurrent ? "text-ink-950 font-semibold" : "text-ink-400"
@@ -100,38 +99,23 @@ export default function TourDetailScreen() {
                   >
                     {String(stop.order).padStart(2, "0")}
                   </span>
-                  <div className="flex-1">
-                    <button type="button" onClick={() => openAtStop(stop)} className="text-left w-full">
-                      <span className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`text-[15px] font-serif ${isCurrent ? "text-ink-950" : "text-ink-900"}`}>
-                          {stop.title}
-                        </span>
-                        {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
-                        {isCurrent && (
-                          <span className="text-[9px] uppercase tracking-wide border border-ink-950 px-1.5 py-0.5">Now</span>
-                        )}
-                        {visited && <CoveredBadge />}
+                  <span className="flex-1">
+                    <span className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[15px] font-serif ${isCurrent ? "text-ink-950" : "text-ink-900"}`}>
+                        {stop.title}
                       </span>
-                      <span className="block text-[12.5px] text-ink-500 mt-0.5 leading-snug">{stop.teaser}</span>
-                      <span className="block text-[11px] text-ink-400 mt-1.5 font-mono uppercase tracking-wide">
-                        {formatTime(stop.timestamp)} · {formatDuration(stop.duration)}
-                      </span>
-                    </button>
-
-                    <div className="flex items-center gap-3 mt-2.5">
-                      <FavoriteButton
-                        active={userData.isFavoriteStop(stop.id)}
-                        onToggle={() => userData.toggleFavoriteStop(stop.id)}
-                        size="sm"
-                      />
-                      <FeedbackControl stopId={stop.id} stopTitle={stop.title} />
-                    </div>
-
-                    <div className="mt-2.5">
-                      <MemoryUpload stopId={stop.id} />
-                    </div>
-                  </div>
-                </div>
+                      {stop.hasAR && <Sparkles size={12} className="text-ink-500 shrink-0" />}
+                      {isCurrent && (
+                        <span className="text-[9px] uppercase tracking-wide border border-ink-950 px-1.5 py-0.5">Now</span>
+                      )}
+                      {visited && <CoveredBadge />}
+                    </span>
+                    <span className="block text-[12.5px] text-ink-500 mt-0.5 leading-snug">{stop.teaser}</span>
+                    <span className="block text-[11px] text-ink-400 mt-1.5 font-mono uppercase tracking-wide">
+                      {formatTime(stop.timestamp)} · {formatDuration(stop.duration)}
+                    </span>
+                  </span>
+                </button>
               </li>
             );
           })}
@@ -140,8 +124,8 @@ export default function TourDetailScreen() {
 
       {!isActive && (
         <div
-          className={`absolute inset-x-0 p-4 bg-paper ${
-            player.tour ? "bottom-[124px] border-t border-ink-950" : "bottom-0 border-t border-ink-950 pb-[calc(env(safe-area-inset-bottom,0px)+16px)]"
+          className={`absolute inset-x-0 p-4 bg-paper border-t border-ink-950 ${
+            player.tour ? "bottom-[124px]" : "bottom-[64px]"
           }`}
         >
           <button

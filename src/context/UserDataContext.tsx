@@ -1,12 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-export interface MemoryPhoto {
-  id: string;
-  dataUrl: string;
-  caption?: string;
-  createdAt: string;
-}
-
 export interface Feedback {
   rating: number;
   note: string;
@@ -14,28 +7,21 @@ export interface Feedback {
 
 interface StoredShape {
   favoriteTours: string[];
-  favoriteStops: string[];
   visitedStops: string[];
   feedback: Record<string, Feedback>;
-  memories: Record<string, MemoryPhoto[]>;
 }
 
 interface UserDataContextValue {
   isFavoriteTour: (tourId: string) => boolean;
   toggleFavoriteTour: (tourId: string) => void;
-  isFavoriteStop: (stopId: string) => boolean;
-  toggleFavoriteStop: (stopId: string) => void;
   isVisited: (stopId: string) => boolean;
   markVisited: (stopId: string) => void;
-  getFeedback: (stopId: string) => Feedback | undefined;
-  setFeedback: (stopId: string, feedback: Feedback) => void;
-  getMemories: (stopId: string) => MemoryPhoto[];
-  addMemory: (stopId: string, dataUrl: string, caption?: string) => void;
-  removeMemory: (stopId: string, memoryId: string) => void;
+  getFeedback: (tourId: string) => Feedback | undefined;
+  setFeedback: (tourId: string, feedback: Feedback) => void;
   visitedCountForStops: (stopIds: string[]) => number;
 }
 
-const STORAGE_KEY = "wayfare:userdata:v1";
+const STORAGE_KEY = "wayfare:userdata:v2";
 
 function loadInitial(): StoredShape {
   try {
@@ -44,13 +30,11 @@ function loadInitial(): StoredShape {
     const parsed = JSON.parse(raw);
     return {
       favoriteTours: parsed.favoriteTours ?? [],
-      favoriteStops: parsed.favoriteStops ?? [],
       visitedStops: parsed.visitedStops ?? [],
       feedback: parsed.feedback ?? {},
-      memories: parsed.memories ?? {},
     };
   } catch {
-    return { favoriteTours: [], favoriteStops: [], visitedStops: [], feedback: {}, memories: {} };
+    return { favoriteTours: [], visitedStops: [], feedback: {} };
   }
 }
 
@@ -63,12 +47,11 @@ export function UserDataProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {
-      // storage full or unavailable — memories in particular can be large; fail silently
+      // storage full or unavailable — fail silently
     }
   }, [data]);
 
   const favoriteTourSet = useMemo(() => new Set(data.favoriteTours), [data.favoriteTours]);
-  const favoriteStopSet = useMemo(() => new Set(data.favoriteStops), [data.favoriteStops]);
   const visitedStopSet = useMemo(() => new Set(data.visitedStops), [data.visitedStops]);
 
   const isFavoriteTour = useCallback((tourId: string) => favoriteTourSet.has(tourId), [favoriteTourSet]);
@@ -82,37 +65,14 @@ export function UserDataProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const isFavoriteStop = useCallback((stopId: string) => favoriteStopSet.has(stopId), [favoriteStopSet]);
-  const toggleFavoriteStop = useCallback((stopId: string) => {
-    setData((prev) => {
-      const has = prev.favoriteStops.includes(stopId);
-      return {
-        ...prev,
-        favoriteStops: has ? prev.favoriteStops.filter((id) => id !== stopId) : [...prev.favoriteStops, stopId],
-      };
-    });
-  }, []);
-
   const isVisited = useCallback((stopId: string) => visitedStopSet.has(stopId), [visitedStopSet]);
   const markVisited = useCallback((stopId: string) => {
     setData((prev) => (prev.visitedStops.includes(stopId) ? prev : { ...prev, visitedStops: [...prev.visitedStops, stopId] }));
   }, []);
 
-  const getFeedback = useCallback((stopId: string) => data.feedback[stopId], [data.feedback]);
-  const setFeedback = useCallback((stopId: string, feedback: Feedback) => {
-    setData((prev) => ({ ...prev, feedback: { ...prev.feedback, [stopId]: feedback } }));
-  }, []);
-
-  const getMemories = useCallback((stopId: string) => data.memories[stopId] ?? [], [data.memories]);
-  const addMemory = useCallback((stopId: string, dataUrl: string, caption?: string) => {
-    const memory: MemoryPhoto = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, dataUrl, caption, createdAt: new Date().toISOString() };
-    setData((prev) => ({ ...prev, memories: { ...prev.memories, [stopId]: [...(prev.memories[stopId] ?? []), memory] } }));
-  }, []);
-  const removeMemory = useCallback((stopId: string, memoryId: string) => {
-    setData((prev) => ({
-      ...prev,
-      memories: { ...prev.memories, [stopId]: (prev.memories[stopId] ?? []).filter((m) => m.id !== memoryId) },
-    }));
+  const getFeedback = useCallback((tourId: string) => data.feedback[tourId], [data.feedback]);
+  const setFeedback = useCallback((tourId: string, feedback: Feedback) => {
+    setData((prev) => ({ ...prev, feedback: { ...prev.feedback, [tourId]: feedback } }));
   }, []);
 
   const visitedCountForStops = useCallback((stopIds: string[]) => stopIds.filter((id) => visitedStopSet.has(id)).length, [visitedStopSet]);
@@ -120,15 +80,10 @@ export function UserDataProvider({ children }: { children: ReactNode }) {
   const value: UserDataContextValue = {
     isFavoriteTour,
     toggleFavoriteTour,
-    isFavoriteStop,
-    toggleFavoriteStop,
     isVisited,
     markVisited,
     getFeedback,
     setFeedback,
-    getMemories,
-    addMemory,
-    removeMemory,
     visitedCountForStops,
   };
 

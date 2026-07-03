@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Heart, LocateFixed, Minus, Plus, Sparkles, DoorOpen } from "lucide-react";
+import { LocateFixed, Minus, Plus, Sparkles, DoorOpen } from "lucide-react";
 import { getTourById } from "../data/tours";
 import { usePlayer } from "../context/PlayerContext";
 import { useUserData } from "../context/UserDataContext";
@@ -102,8 +102,6 @@ export default function MapScreen() {
             const done = isActive && i < player.currentStopIndex;
             const current = isActive && i === player.currentStopIndex;
             const visited = userData.isVisited(stop.id);
-            const favorite = userData.isFavoriteStop(stop.id);
-            const memories = userData.getMemories(stop.id);
             return (
               <button
                 key={stop.id}
@@ -112,11 +110,8 @@ export default function MapScreen() {
                 className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center"
                 style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
               >
-                {memories.length > 0 && (
-                  <img src={memories[0].dataUrl} alt="" className="h-4 w-4 object-cover border border-ink-950 -mb-1 z-10" />
-                )}
                 <span
-                  className={`relative h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
+                  className={`h-7 w-7 flex items-center justify-center text-[11px] font-semibold border ${
                     current
                       ? "bg-ink-950 text-paper border-ink-950"
                       : visited || done
@@ -125,9 +120,6 @@ export default function MapScreen() {
                   }`}
                 >
                   {stop.order}
-                  {favorite && (
-                    <Heart size={9} fill="currentColor" className="absolute -top-1.5 -right-1.5 text-ink-950 bg-paper rounded-full p-[1px]" />
-                  )}
                 </span>
                 {stop.hasAR && <Sparkles size={11} className="text-ink-700 -mt-1 bg-paper p-[1px]" />}
               </button>
@@ -194,8 +186,8 @@ export default function MapScreen() {
               Jump audio here
             </button>
             <FavoriteButton
-              active={userData.isFavoriteStop(selected.id)}
-              onToggle={() => userData.toggleFavoriteStop(selected.id)}
+              active={userData.isFavoriteTour(tour.id)}
+              onToggle={() => userData.toggleFavoriteTour(tour.id)}
             />
             {selected.hasAR && (
               <button

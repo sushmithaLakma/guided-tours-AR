@@ -4,6 +4,7 @@ import type { Tour } from "../types/tour";
 import { formatDuration } from "../lib/format";
 import { useUserData } from "../context/UserDataContext";
 import FavoriteButton from "./FavoriteButton";
+import PhotoBlock from "./PhotoBlock";
 
 export default function TourCard({ tour }: { tour: Tour }) {
   const navigate = useNavigate();
@@ -21,20 +22,20 @@ export default function TourCard({ tour }: { tour: Tour }) {
       }}
       className="w-full text-left group cursor-pointer"
     >
-      <div className={`relative aspect-[16/10] bg-gradient-to-br ${tour.gradient} editorial-photo`}>
+      <PhotoBlock gradient={tour.gradient} className="aspect-[16/10]">
         {tour.stops.some((s) => s.hasAR) && (
-          <span className="absolute top-0 left-0 border border-ink-950 bg-paper px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-ink-950">
+          <span className="absolute z-10 top-0 left-0 border border-ink-950 bg-paper px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-ink-950">
             AR waypoints
           </span>
         )}
-        <span className="absolute top-2 right-2">
+        <span className="absolute z-10 top-2 right-2">
           <FavoriteButton
             active={userData.isFavoriteTour(tour.id)}
             onToggle={() => userData.toggleFavoriteTour(tour.id)}
             size="sm"
           />
         </span>
-      </div>
+      </PhotoBlock>
       <div className="pt-3">
         <h3 className="font-serif text-[19px] leading-snug text-ink-950">{tour.title}</h3>
         <p className="text-[13px] text-ink-600 leading-snug mt-1">{tour.tagline}</p>
